@@ -1,0 +1,29 @@
+namespace: jellyfin
+
+persistence:
+  config:
+    enabled: true
+    accessMode: ReadWriteOnce
+    size: 10Gi
+    storageClass: local-storage
+    existingClaim: ""
+    mountPath: /config
+
+  media:
+    enabled: true
+    accessMode: ReadWriteMany
+    size: 4Ti
+    storageClass: manual
+    existingClaim: ""
+    mountPath: /media
+
+replicaCount: 1
+
+image:
+  repository: jellyfin/jellyfin
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8096

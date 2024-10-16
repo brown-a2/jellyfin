@@ -1,0 +1,16 @@
+{{- if .Values.persistence.media.enabled }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: jellyfin-media-pv
+spec:
+  capacity:
+    storage: {{ .Values.persistence.media.size }}
+  volumeMode: Filesystem
+  accessModes:
+    - {{ .Values.persistence.media.accessMode }}
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: {{ .Values.persistence.media.storageClass }}
+  hostPath:
+    path: /mnt/nvme4tb
+{{- end }}
