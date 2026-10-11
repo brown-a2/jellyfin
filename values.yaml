@@ -21,8 +21,18 @@ replicaCount: 1
 
 image:
   repository: jellyfin/jellyfin
-  tag: latest
+  # Pinned so plugin versions below stay ABI-compatible with the server.
+  # Bump together with plugins.*.version/checksum when upgrading.
+  tag: "12.2"
   pullPolicy: IfNotPresent
+
+# Plugins installed into /config/plugins by an init container before Jellyfin starts.
+# Versions and md5 checksums come from https://repo.jellyfin.org/files/plugin/manifest.json
+plugins:
+  openSubtitles:
+    enabled: true
+    version: "25.0.0.0"   # targetAbi 12.0.0.0
+    checksum: "4fe7744c4e24f22fcb395c90d66fbfb6"
 
 service:
   type: ClusterIP

@@ -12,9 +12,33 @@ spec:
       labels:
         app: jellyfin
     spec:
+      {{- if .Values.plugins.openSubtitles.enabled }}
+      initContainers:
+        - name: install-opensubtitles
+          image: alpine:3.20
+          command: ["sh", "-c"]
+          args:
+            - |
+              set -e
+              VER={{ .Values.plugins.openSubtitles.version }}
+              DEST="{{ .Values.persistence.config.mountPath }}/plugins/Open Subtitles_${VER}"
+              if [ -f "$DEST/Jellyfin.Plugin.OpenSubtitles.dll" ]; then
+                echo "Open Subtitles $VER already installed"
+                exit 0
+              fi
+              wget -qO /tmp/os.zip "https://repo.jellyfin.org/files/plugin/open-subtitles/open-subtitles_${VER}.zip"
+              echo "{{ .Values.plugins.openSubtitles.checksum }}  /tmp/os.zip" | md5sum -c -
+              mkdir -p "$DEST"
+              unzip -o /tmp/os.zip -d "$DEST"
+              echo "Installed Open Subtitles $VER"
+          volumeMounts:
+            - name: config-volume
+              mountPath: {{ .Values.persistence.config.mountPath }}
+      {{- end }}
       containers:
         - name: jellyfin
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: 8096
           volumeMounts:
