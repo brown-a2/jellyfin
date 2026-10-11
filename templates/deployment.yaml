@@ -12,6 +12,10 @@ spec:
       labels:
         app: jellyfin
     spec:
+      {{- with .Values.dnsConfig }}
+      dnsConfig:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- if .Values.plugins.openSubtitles.enabled }}
       initContainers:
         - name: install-opensubtitles

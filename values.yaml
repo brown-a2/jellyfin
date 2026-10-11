@@ -37,3 +37,10 @@ plugins:
 service:
   type: ClusterIP
   port: 8096
+# ndots:1 makes external names (repo.jellyfin.org) resolve as-is instead of first
+# walking the node's search domains (totoro-pi.ddns.net, lan). One of those returns
+# SERVFAIL, which Alpine/musl treats as fatal ("bad address").
+dnsConfig:
+  options:
+    - name: ndots
+      value: "1"
