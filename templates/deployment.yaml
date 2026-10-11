@@ -19,17 +19,23 @@ spec:
           command: ["sh", "-c"]
           args:
             - |
-              set -e
+              # Never fail the pod: a missing plugin must not stop Jellyfin from starting.
               VER={{ .Values.plugins.openSubtitles.version }}
               DEST="{{ .Values.persistence.config.mountPath }}/plugins/Open Subtitles_${VER}"
+              URL="https://repo.jellyfin.org/files/plugin/open-subtitles/open-subtitles_${VER}.zip"
+              fail() {
+                echo "WARNING: Open Subtitles $VER not installed ($1); starting Jellyfin without it"
+                rm -rf "$DEST"
+                exit 0
+              }
               if [ -f "$DEST/Jellyfin.Plugin.OpenSubtitles.dll" ]; then
                 echo "Open Subtitles $VER already installed"
                 exit 0
               fi
-              wget -qO /tmp/os.zip "https://repo.jellyfin.org/files/plugin/open-subtitles/open-subtitles_${VER}.zip"
-              echo "{{ .Values.plugins.openSubtitles.checksum }}  /tmp/os.zip" | md5sum -c -
-              mkdir -p "$DEST"
-              unzip -o /tmp/os.zip -d "$DEST"
+              wget -O /tmp/os.zip "$URL" || fail "download failed: $URL"
+              echo "{{ .Values.plugins.openSubtitles.checksum }}  /tmp/os.zip" | md5sum -c - || fail "checksum mismatch"
+              mkdir -p "$DEST" || fail "cannot create $DEST"
+              unzip -o /tmp/os.zip -d "$DEST" || fail "unzip failed"
               echo "Installed Open Subtitles $VER"
           volumeMounts:
             - name: config-volume
